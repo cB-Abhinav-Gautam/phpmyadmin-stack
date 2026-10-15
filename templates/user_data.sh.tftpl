@@ -1,0 +1,24 @@
+#!/bin/bash
+set -euo pipefail
+
+# Install and start the container runtime.
+dnf install -y docker
+systemctl enable --now docker
+
+# Authenticate to the private registry. The VPC has no internet egress, so this
+# traffic goes over the ECR interface endpoints.
+aws ecr get-login-password --region ${region} \
+  | docker login --username AWS --password-stdin ${registry}
+
+# Run phpMyAdmin bound to the loopback interface only. It is never exposed on
+# the network: access is through an SSM port-forwarding session, which connects
+# to localhost on this instance.
+docker run -d \
+  --name phpmyadmin \
+  --restart always \
+  --publish 127.0.0.1:${phpmyadmin_port}:80 \
+  --env PMA_HOST=${db_host} \
+  --env PMA_PORT=${db_port} \
+  --env PMA_ABSOLUTE_URI=http://localhost:${phpmyadmin_port}/ \
+  --env UPLOAD_LIMIT=256M \
+  ${image_uri}

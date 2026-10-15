@@ -1,0 +1,21 @@
+# Local OpenTofu/Terraform working directories and vendored modules.
+**/.terraform/*
+.terraform/
+.terraform.tfstate.lock.info
+
+# State files should never be committed; this stack uses a remote backend.
+*.tfstate
+*.tfstate.*
+
+# Crash logs
+crash.log
+crash.*.log
+
+# Variable files may contain environment-specific or sensitive values.
+*.tfvars
+*.tfvars.json
+!example.tfvars
+
+# CLI configuration
+.terraformrc
+terraform.rc
